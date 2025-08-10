@@ -1,0 +1,2 @@
+# Schulplan-Api
+Schulplan Api
