@@ -7,19 +7,23 @@ import {
   createClass,
 } from '../controller/classController.js';
 
-import { protectedRoute } from '../controller/authController.js';
+import { protectedRoute, restrictTo } from '../controller/authController.js';
 
 const router = express.Router();
 
 router
   .route('/')
-  .get(protectedRoute, getAllClasses)
-  .post(protectedRoute, createClass);
+  .get(
+    protectedRoute,
+    restrictTo('user', 'teacher', 'mod', 'admin'),
+    getAllClasses,
+  )
+  .post(protectedRoute, restrictTo('teacher', 'mod', 'admin'), createClass);
 
 router
   .route('/:id')
-  .get(protectedRoute, getClass)
-  .delete(protectedRoute, deleteClass)
-  .patch(protectedRoute, updateClass);
+  .get(protectedRoute, restrictTo('user', 'teacher', 'mod', 'admin'), getClass)
+  .delete(protectedRoute, restrictTo('teacher', 'mod', 'admin'), deleteClass)
+  .patch(protectedRoute, restrictTo('teacher', 'mod', 'admin'), updateClass);
 
 export default router;

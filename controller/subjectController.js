@@ -21,10 +21,13 @@ export const createSubject = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getAllSubject = catchAsync(async (req, res, next) => {
+export const getAllSubjects = catchAsync(async (req, res, next) => {
+  const query =
+    req.user.role === 'user' ? { className: req.user.className } : {}; // Lehrer/Admin sehen alles
+
   const data = await new APIFeatures(
-    Subject.find().populate([
-      { path: 'teacher', select: 'firstName' },
+    Subject.find(query).populate([
+      { path: 'teacher', select: 'firstName lastName' },
       {
         path: 'className',
         select: 'name',
@@ -58,6 +61,17 @@ export const getSubject = catchAsync(async (req, res, next) => {
     path: 'teacher',
     select: 'firstName lastName',
   });
+
+  if (!subject) {
+    return next(new AppError('Fach nicht gefunden', 404));
+  }
+
+  if (
+    req.user.role === 'user' &&
+    !subject.className.equals(req.user.className)
+  ) {
+    return next(new AppError('Zugriff verweigert', 403));
+  }
 
   res.status(200).json({
     status: 'success',

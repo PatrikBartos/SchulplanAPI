@@ -1,7 +1,7 @@
 import express from 'express';
 import {
   createSubject,
-  getAllSubject,
+  getAllSubjects,
   getSubject,
   updateSubject,
   deleteSubject,
@@ -13,12 +13,20 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(protectedRoute, createSubject)
-  .get(protectedRoute, getAllSubject);
+  .post(protectedRoute, restrictTo('teacher', 'mod', 'admin'), createSubject)
+  .get(
+    protectedRoute,
+    restrictTo('user', 'teacher', 'mod', 'admin'),
+    getAllSubjects,
+  );
 router
   .route('/:id')
-  .get(protectedRoute, getSubject)
-  .patch(protectedRoute, updateSubject)
-  .delete(protectedRoute, deleteSubject);
+  .get(
+    protectedRoute,
+    restrictTo('user', 'teacher', 'mod', 'admin'),
+    getSubject,
+  )
+  .patch(protectedRoute, restrictTo('teacher', 'mod', 'admin'), updateSubject)
+  .delete(protectedRoute, restrictTo('teacher', 'mod', 'admin'), deleteSubject);
 
 export default router;

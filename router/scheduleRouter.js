@@ -7,19 +7,27 @@ import {
   createSchedule,
 } from '../controller/scheduleController.js';
 
-import { protectedRoute } from '../controller/authController.js';
+import { protectedRoute, restrictTo } from '../controller/authController.js';
 
 const router = express.Router();
 
 router
   .route('/')
-  .get(protectedRoute, getAllSchedule)
-  .post(protectedRoute, createSchedule);
+  .get(
+    protectedRoute,
+    restrictTo('user', 'teacher', 'mod', 'admin'),
+    getAllSchedule,
+  )
+  .post(protectedRoute, restrictTo('teacher', 'mod', 'admin'), createSchedule);
 
 router
   .route('/:id')
-  .get(protectedRoute, getSchedule)
-  .delete(protectedRoute, deleteSchedule)
-  .patch(protectedRoute, updateSchedule);
+  .get(
+    protectedRoute,
+    restrictTo('user', 'teacher', 'mod', 'admin'),
+    getSchedule,
+  )
+  .delete(protectedRoute, restrictTo('teacher', 'mod', 'admin'), deleteSchedule)
+  .patch(protectedRoute, restrictTo('teacher', 'mod', 'admin'), updateSchedule);
 
 export default router;
