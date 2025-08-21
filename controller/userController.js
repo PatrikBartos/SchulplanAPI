@@ -80,3 +80,39 @@ export const deleteUser = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+export const getUsersFromClass = async (req, res, next) => {
+  try {
+    const users = await User.aggregate([
+      {
+        $lookup: {
+          from: 'classes',
+          localField: 'className',
+          foreignField: '_id',
+          as: 'classInfo',
+        },
+      },
+      { $unwind: '$classInfo' },
+      {
+        $match: {
+          'classInfo.name': { $regex: `^${req.params.grade}` },
+        },
+      },
+      {
+        $project: {
+          firstName: 1,
+          lastName: 1,
+          'classInfo.name': 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      results: users.length,
+      data: users,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

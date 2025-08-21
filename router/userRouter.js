@@ -4,6 +4,7 @@ import {
   getUser,
   updateUser,
   deleteUser,
+  getUsersFromClass,
 } from '../controller/userController.js';
 import {
   signupUser,
@@ -11,9 +12,16 @@ import {
   login,
   protectedRoute,
   restrictTo,
+  forgotPassword,
+  resetPassword,
 } from '../controller/authController.js';
 
 const router = express.Router();
+
+router.post('/forgotPassword', forgotPassword);
+router.patch('/resetPassword/:token', resetPassword);
+
+router.get('/class/:grade', getUsersFromClass);
 
 router.post('/signup-user', signupUser);
 router.post('/signup-teacher', signupTeacher);

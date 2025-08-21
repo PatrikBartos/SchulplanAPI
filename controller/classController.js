@@ -3,7 +3,6 @@ import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import APIFeatures from '../utils/apiFeatures.js';
 
-// -------------------- Create Class --------------------
 export const createClass = catchAsync(async (req, res, next) => {
   const { name } = req.body;
 
