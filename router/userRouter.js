@@ -14,11 +14,12 @@ import {
   restrictTo,
   forgotPassword,
   resetPassword,
+  forgotPasswordLimiter,
 } from '../controller/authController.js';
 
 const router = express.Router();
 
-router.post('/forgotPassword', forgotPassword);
+router.post('/forgotPassword', forgotPasswordLimiter, forgotPassword);
 router.patch('/resetPassword/:token', resetPassword);
 
 router.get('/class/:grade', getUsersFromClass);

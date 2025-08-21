@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs';
 import sendEmail from '../utils/email.js';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
@@ -248,6 +249,17 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
       ),
     );
   }
+});
+
+export const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 Stunde
+  max: 3,
+  message: {
+    status: 'fail',
+    message: 'Bitte versuche es später erneut',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 export const resetPassword = catchAsync(async (req, res, next) => {
