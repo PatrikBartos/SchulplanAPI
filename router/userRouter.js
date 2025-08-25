@@ -15,9 +15,17 @@ import {
   forgotPassword,
   resetPassword,
   forgotPasswordLimiter,
+  updatePassword,
 } from '../controller/authController.js';
 
 const router = express.Router();
+
+router.patch(
+  '/updatePassword',
+  protectedRoute,
+  restrictTo('user', 'teacher', 'mod', 'admin'),
+  updatePassword,
+);
 
 router.post('/forgotPassword', forgotPasswordLimiter, forgotPassword);
 router.patch('/resetPassword/:token', resetPassword);

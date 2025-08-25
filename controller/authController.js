@@ -300,3 +300,35 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+export const updatePassword = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+password');
+
+  if (!user) {
+    return next(new AppError('Benuter nicht gefunden', 400));
+  }
+
+  if (!(await user.correctPassword(req.body.currentPassword, user.password))) {
+    return next(new AppError('Falsches Passwort', 401));
+  }
+
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.password = req.body.password;
+
+  await user.save();
+
+  const payload = { id: user._id, email: user.email, role: user.role };
+
+  const token = jwt.sign(payload, privateKey, {
+    algorithm: 'RS256',
+    expiresIn: '1h',
+  });
+
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+});
