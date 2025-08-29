@@ -3,6 +3,11 @@ import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import APIFeatures from '../utils/apiFeatures.js';
 
+const filterObj = (obj, ...allowedFields) =>
+  Object.fromEntries(
+    Object.entries(obj).filter(([key]) => allowedFields.includes(key)),
+  );
+
 export const getAllUser = catchAsync(async (req, res, next) => {
   const data = await new APIFeatures(
     User.find().populate({
@@ -64,6 +69,39 @@ export const updateUser = catchAsync(async (req, res, next) => {
   });
 });
 
+export const updateMe = catchAsync(async (req, res, next) => {
+  if (req.user.isActive === false) {
+    return next(
+      new AppError('Gelöschte Accounts können nicht aktualisiert werden', 403),
+    );
+  }
+
+  if (req.body.password || req.body.passwordConfirm) {
+    return next(
+      new AppError(
+        'Diese Route ist nicht für das ändern des Passworts. Bitte benutze /updatePassword ',
+        400,
+      ),
+    );
+  }
+
+  const filteredBody = filterObj(req.body, 'firstName', 'lastName', 'age');
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+    new: true,
+    runValidators: true,
+  });
+
+  console.log('req.user:', req.user);
+  console.log('filteredBody:', filteredBody);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      updatedUser,
+    },
+  });
+});
+
 export const deleteUser = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
@@ -78,6 +116,38 @@ export const deleteUser = catchAsync(async (req, res, next) => {
     data: {
       deletedUser,
     },
+  });
+});
+
+export const deleteMe = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+password');
+
+  if (!user) {
+    return next(new AppError('Benuter nicht gefunden', 400));
+  }
+
+  const { password } = req.body;
+  if (!password) {
+    return next(new AppError('Bitte Passwort angeben', 400));
+  }
+
+  const isCorrect = await user.correctPassword(password, user.password);
+  if (!isCorrect) {
+    return next(new AppError('Falsches Passwort', 401));
+  }
+
+  await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      isActive: false,
+      deletedAt: Date.now(),
+    },
+    { validateBeforeSave: false },
+  );
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
   });
 });
 

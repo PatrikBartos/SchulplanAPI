@@ -5,6 +5,8 @@ import {
   updateUser,
   deleteUser,
   getUsersFromClass,
+  deleteMe,
+  updateMe,
 } from '../controller/userController.js';
 import {
   signupUser,
@@ -35,6 +37,8 @@ router.get('/class/:grade', getUsersFromClass);
 router.post('/signup-user', signupUser);
 router.post('/signup-teacher', signupTeacher);
 router.post('/login', login);
+router.patch('/deleteMe', protectedRoute, deleteMe);
+router.patch('/updateMe', protectedRoute, updateMe);
 
 router
   .route('/')
