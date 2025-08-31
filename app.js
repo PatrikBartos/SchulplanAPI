@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import scheduleRouter from './router/scheduleRouter.js';
 import subjectRouter from './router/subjectRouter.js';
 import userRouter from './router/userRouter.js';
@@ -7,6 +8,7 @@ import errorHandlingMiddleware from './controller/errorController.js';
 import AppError from './utils/appError.js';
 
 const app = express();
+app.use(helmet());
 app.use(express.json());
 
 app.use('/api/v1/schedule', scheduleRouter);

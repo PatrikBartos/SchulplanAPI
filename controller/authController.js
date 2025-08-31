@@ -253,7 +253,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
 export const forgotPasswordLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 Stunde
-  max: 3,
+  max: 5,
   message: {
     status: 'fail',
     message: 'Bitte versuche es später erneut',
