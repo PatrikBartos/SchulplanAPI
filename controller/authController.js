@@ -26,6 +26,41 @@ try {
   process.exit(1);
 }
 
+const signToken = (user) => {
+  const payload = {
+    id: user._id,
+    email: user.email,
+    role: user.role,
+  };
+  return jwt.sign(payload, privateKey, {
+    algorithm: 'RS256',
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
+
+const sendCreateToken = (user, statusCode, res) => {
+  const token = signToken(user);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+    ),
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  res.cookie('jwt', token, cookieOptions);
+
+  user.password = undefined;
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+};
+
 export const signupTeacher = catchAsync(async (req, res, next) => {
   const {
     firstName,
@@ -60,26 +95,7 @@ export const signupTeacher = catchAsync(async (req, res, next) => {
   });
   await newTeacher.save();
 
-  const payload = {
-    id: newTeacher._id,
-    email: newTeacher.email,
-    role: newTeacher.role,
-  };
-
-  const token = jwt.sign(payload, privateKey, {
-    algorithm: 'RS256',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  });
-
-  newTeacher.password = undefined;
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      newTeacher,
-    },
-  });
+  sendCreateToken(newTeacher, 201, res);
 });
 
 export const signupUser = catchAsync(async (req, res, next) => {
@@ -117,22 +133,7 @@ export const signupUser = catchAsync(async (req, res, next) => {
   });
   await newUser.save();
 
-  const payload = { id: newUser._id, email: newUser.email, role: newUser.role };
-
-  const token = jwt.sign(payload, privateKey, {
-    algorithm: 'RS256',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  });
-
-  newUser.password = undefined;
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      newUser,
-    },
-  });
+  sendCreateToken(newUser, 201, res);
 });
 
 export const login = catchAsync(async (req, res, next) => {
@@ -253,7 +254,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
 export const forgotPasswordLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 Stunde
-  max: 5,
+  max: 10,
   message: {
     status: 'fail',
     message: 'Bitte versuche es später erneut',
@@ -277,28 +278,17 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     return next(new AppError('Token ist ungültig oder abgelaufen', 400));
   }
 
+  if (req.body.password !== req.body.passwordConfirm) {
+    return next(new AppError('Passwörter stimmen nicht überein.', 400));
+  }
+
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save(); // in der Datenbank speichern
 
-  const payload = { id: user._id, email: user.email, role: user.role };
-
-  const token = jwt.sign(payload, privateKey, {
-    algorithm: 'RS256',
-    expiresIn: '1h',
-  });
-
-  user.password = undefined;
-
-  res.status(200).json({
-    status: 'success',
-    token,
-    data: {
-      user,
-    },
-  });
+  sendCreateToken(user, 200, res);
 });
 
 export const updatePassword = catchAsync(async (req, res, next) => {
@@ -317,18 +307,5 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 
   await user.save();
 
-  const payload = { id: user._id, email: user.email, role: user.role };
-
-  const token = jwt.sign(payload, privateKey, {
-    algorithm: 'RS256',
-    expiresIn: '1h',
-  });
-
-  res.status(200).json({
-    status: 'success',
-    token,
-    data: {
-      user,
-    },
-  });
+  sendCreateToken(user, 200, res);
 });

@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import scheduleRouter from './router/scheduleRouter.js';
 import subjectRouter from './router/subjectRouter.js';
@@ -10,6 +11,18 @@ import AppError from './utils/appError.js';
 const app = express();
 app.use(helmet());
 app.use(express.json());
+
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 100,
+  message: {
+    status: 'fail',
+    message: 'Zu viele Anfragen. Bitte versuche es später erneut',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', limiter);
 
 app.use('/api/v1/schedule', scheduleRouter);
 app.use('/api/v1/subject', subjectRouter);
