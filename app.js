@@ -7,10 +7,18 @@ import userRouter from './router/userRouter.js';
 import classRouter from './router/classRouter.js';
 import errorHandlingMiddleware from './controller/errorController.js';
 import AppError from './utils/appError.js';
+import mongoSanitize from 'express-mongo-sanitize';
 
 const app = express();
 app.use(helmet());
 app.use(express.json());
+
+app.use((req, _res, next) => {
+  if (req.body) {
+    mongoSanitize.sanitize(req.body); // nur req.body wird bereinigt
+  }
+  next();
+});
 
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
