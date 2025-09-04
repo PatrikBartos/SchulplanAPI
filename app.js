@@ -8,10 +8,13 @@ import classRouter from './router/classRouter.js';
 import errorHandlingMiddleware from './controller/errorController.js';
 import AppError from './utils/appError.js';
 import mongoSanitize from 'express-mongo-sanitize';
+import sanitizeHTML from './utils/sanitize.js';
+import hpp from 'hpp';
 
 const app = express();
 app.use(helmet());
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
+app.use(hpp());
 
 app.use((req, _res, next) => {
   if (req.body) {
@@ -19,6 +22,21 @@ app.use((req, _res, next) => {
   }
   next();
 });
+
+app.use((req, res, next) => {
+  if (req.body) {
+    Object.keys(req.body).forEach((key) => {
+      if (typeof req.body[key] === 'string') {
+        req.body[key] = sanitizeHTML(req.body[key]);
+      }
+    });
+  }
+  next();
+});
+// Object.keys(req.body) z.b bei { "name": "Alice", "comment": "<script>alert(1)</script>" } === ["name", "comment"]
+// req.body[key] → Zugriff auf den Wert dieses Feldes dynamisch
+// key = Name des Feldes
+// obj[key] = Wert des Feldes
 
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,

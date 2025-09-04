@@ -38,7 +38,16 @@ class APIFeatures {
 
   sort() {
     if (this.queryString.sort) {
-      const sortBy = this.queryString.sort.split(',').join(' '); // umwandeln in ein mongoose Gueltiges Format
+      let sortBy;
+
+      if (Array.isArray(this.queryString.sort)) {
+        sortBy = this.queryString.sort.join(' ');
+      } else if (typeof this.queryString.sort === 'string') {
+        sortBy = this.queryString.sort.split(',').join(' ');
+      } else {
+        sortBy = '_id';
+      }
+
       this.query = this.query.sort(sortBy);
     } else {
       this.query = this.query.sort('_id');
