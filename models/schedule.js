@@ -51,8 +51,16 @@ const scheduleModel = new mongoose.Schema(
   },
   {
     timestamps: true, // erstellt automatisch createdAt & updatedAt
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
+
+scheduleModel.virtual('entrie', {
+  ref: 'Entrie',
+  foreignField: 'schedule',
+  localField: '_id',
+});
 
 const Schedule = mongoose.model('Schedule', scheduleModel);
 

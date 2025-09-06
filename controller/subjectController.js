@@ -58,8 +58,8 @@ export const getSubject = catchAsync(async (req, res, next) => {
   }
 
   const subject = await Subject.findById(id).populate({
-    path: 'teacher',
-    select: 'firstName lastName',
+    path: 'teacher className',
+    select: 'firstName lastName name',
   });
 
   if (!subject) {

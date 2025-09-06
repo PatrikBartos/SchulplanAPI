@@ -9,6 +9,7 @@ export const getAllSchedule = catchAsync(async (req, res, next) => {
 
   const data = await new APIFeatures(
     Schedule.find(query).populate([
+      // mit Schedule.find(query) setzt man eine einschraenkung, das nur die Daten geladen werden sollen, bei den der className dem des eingeloggten Users entspricht, bei role lehrern etc wird keine einschraenkung gesetzt
       { path: 'subject', select: 'subject' },
       { path: 'teacher', select: 'firstName lastName' },
       { path: 'className', select: 'name' },
@@ -36,11 +37,11 @@ export const getSchedule = catchAsync(async (req, res, next) => {
     return next(new AppError('Ungültige ID', 404));
   }
 
-  const schedule = await Schedule.findById(id).populate([
-    { path: 'subject', select: 'subject' },
-    { path: 'teacher', select: 'firstName lastName' },
-    { path: 'className', select: 'name' },
-  ]);
+  const schedule = await Schedule.findById(id)
+    .populate('entrie')
+    .populate('subject', 'subject')
+    .populate('teacher', 'firstName lastName')
+    .populate('className', 'name');
 
   if (!schedule) {
     return next(new AppError('Stundenplan-Eintrag nicht gefunden', 404));

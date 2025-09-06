@@ -5,6 +5,7 @@ import scheduleRouter from './router/scheduleRouter.js';
 import subjectRouter from './router/subjectRouter.js';
 import userRouter from './router/userRouter.js';
 import classRouter from './router/classRouter.js';
+import entrieRouter from './router/entrieRouter.js';
 import errorHandlingMiddleware from './controller/errorController.js';
 import AppError from './utils/appError.js';
 import mongoSanitize from 'express-mongo-sanitize';
@@ -53,6 +54,7 @@ app.use('/api', limiter);
 app.use('/api/v1/schedule', scheduleRouter);
 app.use('/api/v1/subject', subjectRouter);
 app.use('/api/v1/class', classRouter);
+app.use('/api/v1/entrie', entrieRouter);
 
 app.use('/api/v1/user', userRouter);
 

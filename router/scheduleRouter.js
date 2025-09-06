@@ -8,8 +8,11 @@ import {
 } from '../controller/scheduleController.js';
 
 import { protectedRoute, restrictTo } from '../controller/authController.js';
+import entrieRouter from './entrieRouter.js';
 
 const router = express.Router();
+
+router.use('/:scheduleId/entrie', entrieRouter);
 
 router
   .route('/')
