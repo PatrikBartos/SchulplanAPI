@@ -2,6 +2,7 @@ import Schedule from '../models/schedule.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import APIFeatures from '../utils/apiFeatures.js';
+import { updateDoc } from './factoryController.js';
 
 export const getAllSchedule = catchAsync(async (req, res, next) => {
   const query =
@@ -97,25 +98,7 @@ export const createSchedule = catchAsync(async (req, res, next) => {
   });
 });
 
-export const updateSchedule = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return next(new AppError('Ungültige ID', 404));
-  }
-
-  const updatedSchedule = await Schedule.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      updatedSchedule,
-    },
-  });
-});
+export const updateSchedule = updateDoc(Schedule);
 
 export const deleteSchedule = catchAsync(async (req, res, next) => {
   const { id } = req.params;

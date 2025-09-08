@@ -1,6 +1,7 @@
 import Entrie from '../models/entrie.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
+import { updateDoc } from './factoryController.js';
 
 export const createEntrie = catchAsync(async (req, res, next) => {
   const { entrie } = req.body;
@@ -20,7 +21,10 @@ export const createEntrie = catchAsync(async (req, res, next) => {
 });
 
 export const getAllEntries = catchAsync(async (req, res, next) => {
-  const entries = await Entrie.find().populate({
+  let filter = {};
+  if (req.params.scheduleId) filter = { schedule: req.params.scheduleId };
+
+  const entries = await Entrie.find(filter).populate({
     path: 'schedule',
     select: 'day subject order',
     populate: {
@@ -37,3 +41,5 @@ export const getAllEntries = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+export const updateEntrie = updateDoc(Entrie);

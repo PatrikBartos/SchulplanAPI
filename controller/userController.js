@@ -2,6 +2,7 @@ import User from '../models/user.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import APIFeatures from '../utils/apiFeatures.js';
+import { updateDoc } from './factoryController.js';
 
 const filterObj = (obj, ...allowedFields) =>
   Object.fromEntries(
@@ -49,25 +50,7 @@ export const getUser = catchAsync(async (req, res, next) => {
   });
 });
 
-export const updateUser = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return next(new AppError('Ungültige ID', 404));
-  }
-
-  const updatedUser = await User.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      updatedUser,
-    },
-  });
-});
+export const updateUser = updateDoc(User);
 
 export const updateMe = catchAsync(async (req, res, next) => {
   if (req.user.isActive === false) {
@@ -85,14 +68,17 @@ export const updateMe = catchAsync(async (req, res, next) => {
     );
   }
 
-  const filteredBody = filterObj(req.body, 'firstName', 'lastName', 'age');
+  const filteredBody = filterObj(
+    req.body,
+    'firstName',
+    'lastName',
+    'age',
+    'email',
+  );
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
     runValidators: true,
   });
-
-  console.log('req.user:', req.user);
-  console.log('filteredBody:', filteredBody);
 
   res.status(200).json({
     status: 'success',

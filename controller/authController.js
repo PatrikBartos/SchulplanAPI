@@ -61,80 +61,43 @@ const sendCreateToken = (user, statusCode, res) => {
   });
 };
 
-export const signupTeacher = catchAsync(async (req, res, next) => {
-  const {
-    firstName,
-    lastName,
-    age,
-    className,
-    email,
-    password,
-    passwordConfirm,
-  } = req.body;
+export const signup = (role) =>
+  catchAsync(async (req, res, next) => {
+    const {
+      firstName,
+      lastName,
+      age,
+      className,
+      email,
+      password,
+      passwordConfirm,
+    } = req.body;
 
-  if (
-    !firstName ||
-    !lastName ||
-    !className ||
-    !email ||
-    !password ||
-    !passwordConfirm
-  ) {
-    return next(new AppError('Bitte alle Felder ausfüllen', 400));
-  }
+    if (
+      !firstName ||
+      !lastName ||
+      !className ||
+      !email ||
+      !password ||
+      !passwordConfirm
+    ) {
+      return next(new AppError('Bitte alle Felder ausfüllen', 400));
+    }
 
-  const newTeacher = new User({
-    firstName,
-    lastName,
-    age,
-    className,
-    role: 'teacher',
-    email,
-    password,
-    passwordConfirm,
+    const newUser = new User({
+      firstName,
+      lastName,
+      age,
+      className,
+      role,
+      email,
+      password,
+      passwordConfirm,
+    });
+    await newUser.save();
+
+    sendCreateToken(newUser, 201, res);
   });
-  await newTeacher.save();
-
-  sendCreateToken(newTeacher, 201, res);
-});
-
-export const signupUser = catchAsync(async (req, res, next) => {
-  const {
-    firstName,
-    lastName,
-    age,
-    className,
-    email,
-    password,
-    passwordConfirm,
-  } = req.body;
-
-  if (
-    !firstName ||
-    !lastName ||
-    !age ||
-    !className ||
-    !email ||
-    !password ||
-    !passwordConfirm
-  ) {
-    return next(new AppError('Bitte alle Felder ausfüllen!'));
-  }
-
-  const newUser = new User({
-    firstName,
-    lastName,
-    age,
-    className,
-    role: 'user',
-    email,
-    password,
-    passwordConfirm,
-  });
-  await newUser.save();
-
-  sendCreateToken(newUser, 201, res);
-});
 
 export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;

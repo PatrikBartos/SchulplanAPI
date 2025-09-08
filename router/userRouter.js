@@ -9,8 +9,9 @@ import {
   updateMe,
 } from '../controller/userController.js';
 import {
-  signupUser,
-  signupTeacher,
+  // signupUser,
+  // signupTeacher,
+  signup,
   login,
   protectedRoute,
   restrictTo,
@@ -34,8 +35,16 @@ router.patch('/resetPassword/:token', resetPassword);
 
 router.get('/class/:grade', getUsersFromClass);
 
-router.post('/signup-user', signupUser);
-router.post('/signup-teacher', signupTeacher);
+router.post('/signup-user', signup('user'));
+router.post('/signup-teacher', signup('teacher'));
+router.post(
+  '/signup-admin',
+  protectedRoute,
+  restrictTo('admin'),
+  signup('admin'),
+);
+router.post('/signup-mod', protectedRoute, restrictTo('admin'), signup('mod'));
+
 router.post('/login', login);
 router.patch('/deleteMe', protectedRoute, deleteMe);
 router.patch('/updateMe', protectedRoute, updateMe);

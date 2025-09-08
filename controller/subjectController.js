@@ -2,6 +2,7 @@ import Subject from '../models/subject.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import APIFeatures from '../utils/apiFeatures.js';
+import { updateDoc } from './factoryController.js';
 
 export const createSubject = catchAsync(async (req, res, next) => {
   const { subject, teacher, className } = req.body;
@@ -81,25 +82,7 @@ export const getSubject = catchAsync(async (req, res, next) => {
   });
 });
 
-export const updateSubject = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return next(new AppError('Ungültige ID', 404));
-  }
-
-  const updatedSubject = await Subject.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      updatedSubject,
-    },
-  });
-});
+export const updateSubject = updateDoc(Subject);
 
 export const deleteSubject = catchAsync(async (req, res, next) => {
   const { id } = req.params;
