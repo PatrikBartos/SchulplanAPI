@@ -96,6 +96,8 @@ export const signup = (role) =>
     });
     await newUser.save();
 
+    newUser.isActive = undefined;
+
     sendCreateToken(newUser, 201, res);
   });
 

@@ -2,53 +2,29 @@ import User from '../models/user.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import APIFeatures from '../utils/apiFeatures.js';
-import { updateDoc } from './factoryController.js';
+import {
+  updateDoc,
+  deleteDoc,
+  getDoc,
+  getAllDoc,
+} from './factoryController.js';
+import { restrictTo } from './authController.js';
 
 const filterObj = (obj, ...allowedFields) =>
   Object.fromEntries(
     Object.entries(obj).filter(([key]) => allowedFields.includes(key)),
   );
 
-export const getAllUser = catchAsync(async (req, res, next) => {
-  const data = await new APIFeatures(
-    User.find().populate({
-      path: 'className',
-      select: 'name',
-    }),
-    req.query,
-  )
-    .filter()
-    .sort()
-    .fieldLimiting()
-    .pagination();
+export const getAllUser = getAllDoc(
+  User,
+  {
+    path: 'className',
+    select: 'name',
+  },
+  { restrictToClass: null },
+);
 
-  const users = await data.exec();
-
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users,
-    },
-  });
-});
-
-export const getUser = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return next(new AppError('Ungültige ID', 404));
-  }
-
-  const user = await User.findById(id);
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
-});
+export const getUser = getDoc(User);
 
 export const updateUser = updateDoc(User);
 
@@ -88,22 +64,7 @@ export const updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-export const deleteUser = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return next(new AppError('Ungültige ID', 404));
-  }
-
-  const deletedUser = await User.findByIdAndDelete(id);
-
-  res.status(204).json({
-    status: 'success',
-    data: {
-      deletedUser,
-    },
-  });
-});
+export const deleteUser = deleteDoc(User);
 
 export const deleteMe = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');

@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import AppError from '../utils/appError.js';
 
 dotenv.config();
 

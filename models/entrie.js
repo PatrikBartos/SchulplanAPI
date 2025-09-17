@@ -12,6 +12,11 @@ const entrieModel = new mongoose.Schema(
       ref: 'Schedule',
       required: [true, 'Ein Eintrag muss einem Zeitplan angehören'],
     },
+    className: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Class',
+      required: [true, 'Bitte Klasse angeben'],
+    },
   },
   {
     timestamps: true,

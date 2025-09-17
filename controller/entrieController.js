@@ -1,15 +1,20 @@
 import Entrie from '../models/entrie.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
-import { updateDoc } from './factoryController.js';
+import {
+  updateDoc,
+  getAllDoc,
+  getDoc,
+  deleteDoc,
+} from './factoryController.js';
 
 export const createEntrie = catchAsync(async (req, res, next) => {
-  const { entrie } = req.body;
+  const { entrie, className } = req.body;
 
   let { schedule } = req.body;
   if (!schedule) schedule = req.params.scheduleId;
 
-  const newEntrie = new Entrie({ entrie, schedule });
+  const newEntrie = new Entrie({ entrie, schedule, className });
   await newEntrie.save();
 
   res.status(201).json({
@@ -20,26 +25,38 @@ export const createEntrie = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getAllEntries = catchAsync(async (req, res, next) => {
-  let filter = {};
-  if (req.params.scheduleId) filter = { schedule: req.params.scheduleId };
-
-  const entries = await Entrie.find(filter).populate({
-    path: 'schedule',
-    select: 'day subject order',
-    populate: {
-      path: 'subject',
-      select: 'subject',
+export const getAllEntries = getAllDoc(
+  Entrie,
+  [
+    {
+      path: 'schedule',
+      select: 'day subject order',
+      populate: {
+        path: 'subject',
+        select: 'subject',
+      },
     },
-  });
+    { path: 'className', select: 'name' },
+  ],
+  { restrictToClass: true },
+);
 
-  res.status(200).json({
-    status: 'success',
-    results: entries.length,
-    data: {
-      entries,
+export const getEntrie = getDoc(
+  Entrie,
+  [
+    {
+      path: 'schedule',
+      select: 'day subject order',
+      populate: {
+        path: 'subject',
+        select: 'subject',
+      },
     },
-  });
-});
+    { path: 'className', select: 'name' },
+  ],
+  { restrictToClass: true },
+);
 
 export const updateEntrie = updateDoc(Entrie);
+
+export const deleteEntrie = deleteDoc(Entrie);

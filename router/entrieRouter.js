@@ -3,11 +3,21 @@ import {
   createEntrie,
   getAllEntries,
   updateEntrie,
+  deleteEntrie,
+  getEntrie,
 } from '../controller/entrieController.js';
+import { protectedRoute } from '../controller/authController.js';
 
 const router = express.Router({ mergeParams: true });
 
-router.route('/').post(createEntrie).get(getAllEntries);
-router.route('/:id').patch(updateEntrie);
+router
+  .route('/')
+  .post(protectedRoute, createEntrie)
+  .get(protectedRoute, getAllEntries);
+router
+  .route('/:id')
+  .patch(protectedRoute, updateEntrie)
+  .delete(protectedRoute, deleteEntrie)
+  .get(protectedRoute, getEntrie);
 
 export default router;

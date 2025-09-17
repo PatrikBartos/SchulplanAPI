@@ -2,7 +2,12 @@ import Subject from '../models/subject.js';
 import AppError from '../utils/appError.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import APIFeatures from '../utils/apiFeatures.js';
-import { updateDoc } from './factoryController.js';
+import {
+  updateDoc,
+  getDoc,
+  getAllDoc,
+  deleteDoc,
+} from './factoryController.js';
 
 export const createSubject = catchAsync(async (req, res, next) => {
   const { subject, teacher, className } = req.body;
@@ -22,81 +27,24 @@ export const createSubject = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getAllSubjects = catchAsync(async (req, res, next) => {
-  const query =
-    req.user.role === 'user' ? { className: req.user.className } : {}; // Lehrer/Admin sehen alles
+export const getAllSubjects = getAllDoc(
+  Subject,
+  [
+    { path: 'teacher', select: 'firstName lastName' },
+    { path: 'className', select: 'name' },
+  ],
+  { restrictToClass: true },
+);
 
-  const data = await new APIFeatures(
-    Subject.find(query).populate([
-      { path: 'teacher', select: 'firstName lastName' },
-      {
-        path: 'className',
-        select: 'name',
-      },
-    ]),
-    req.query,
-  )
-    .filter()
-    .sort()
-    .fieldLimiting()
-    .pagination();
-
-  const subjects = await data.exec();
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      subjects,
-    },
-  });
-});
-
-export const getSubject = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return next(new AppError('Ungültige ID', 404));
-  }
-
-  const subject = await Subject.findById(id).populate({
-    path: 'teacher className',
-    select: 'firstName lastName name',
-  });
-
-  if (!subject) {
-    return next(new AppError('Fach nicht gefunden', 404));
-  }
-
-  if (
-    req.user.role === 'user' &&
-    !subject.className.equals(req.user.className)
-  ) {
-    return next(new AppError('Zugriff verweigert', 403));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      subject,
-    },
-  });
-});
+export const getSubject = getDoc(
+  Subject,
+  [
+    { path: 'teacher', select: 'firstName' },
+    { path: 'className', select: 'name' },
+  ],
+  { restrictToClass: true },
+);
 
 export const updateSubject = updateDoc(Subject);
 
-export const deleteSubject = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return next(new AppError('Ungültige ID', 404));
-  }
-
-  const deletedSubject = await Subject.findByIdAndDelete(id);
-
-  res.status(204).json({
-    status: 'success',
-    data: {
-      deletedSubject,
-    },
-  });
-});
+export const deleteSubject = deleteDoc(Subject);
