@@ -23,43 +23,43 @@ import {
 
 const router = express.Router();
 
+router.post('/forgotPassword', forgotPasswordLimiter, forgotPassword);
+router.patch('/resetPassword/:token', resetPassword);
+
+router.post('/signup-user', signup('user'));
+router.post('/signup-teacher', signup('teacher'));
+
+router.post('/login', login);
+
+router.use(protectedRoute);
+
 router.patch(
   '/updatePassword',
-  protectedRoute,
+
   restrictTo('user', 'teacher', 'mod', 'admin'),
   updatePassword,
 );
 
-router.post('/forgotPassword', forgotPasswordLimiter, forgotPassword);
-router.patch('/resetPassword/:token', resetPassword);
-
 router.get('/class/:grade', getUsersFromClass);
 
-router.post('/signup-user', signup('user'));
-router.post('/signup-teacher', signup('teacher'));
 router.post(
   '/signup-admin',
-  protectedRoute,
+
   restrictTo('admin'),
   signup('admin'),
 );
-router.post('/signup-mod', protectedRoute, restrictTo('admin'), signup('mod'));
+router.post('/signup-mod', restrictTo('admin'), signup('mod'));
 
-router.post('/login', login);
-router.patch('/deleteMe', protectedRoute, deleteMe);
-router.patch('/updateMe', protectedRoute, updateMe);
+router.patch('/deleteMe', deleteMe);
+router.patch('/updateMe', updateMe);
 
 router
   .route('/')
-  .get(
-    protectedRoute,
-    restrictTo('user', 'teacher', 'mod', 'admin'),
-    getAllUser,
-  );
+  .get(restrictTo('user', 'teacher', 'mod', 'admin'), getAllUser);
 router
   .route('/:id')
-  .get(protectedRoute, restrictTo('user', 'teacher', 'mod', 'admin'), getUser)
-  .patch(protectedRoute, restrictTo('mod', 'admin'), updateUser)
-  .delete(protectedRoute, restrictTo('mod', 'admin'), deleteUser);
+  .get(restrictTo('user', 'teacher', 'mod', 'admin'), getUser)
+  .patch(restrictTo('mod', 'admin'), updateUser)
+  .delete(restrictTo('mod', 'admin'), deleteUser);
 
 export default router;

@@ -10,14 +10,9 @@ import { protectedRoute } from '../controller/authController.js';
 
 const router = express.Router({ mergeParams: true });
 
-router
-  .route('/')
-  .post(protectedRoute, createEntrie)
-  .get(protectedRoute, getAllEntries);
-router
-  .route('/:id')
-  .patch(protectedRoute, updateEntrie)
-  .delete(protectedRoute, deleteEntrie)
-  .get(protectedRoute, getEntrie);
+router.use(protectedRoute);
+
+router.route('/').post(createEntrie).get(getAllEntries);
+router.route('/:id').patch(updateEntrie).delete(deleteEntrie).get(getEntrie);
 
 export default router;

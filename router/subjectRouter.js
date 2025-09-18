@@ -11,22 +11,16 @@ import { protectedRoute, restrictTo } from '../controller/authController.js';
 
 const router = express.Router();
 
+router.use(protectedRoute);
+
 router
   .route('/')
-  .post(protectedRoute, restrictTo('teacher', 'mod', 'admin'), createSubject)
-  .get(
-    protectedRoute,
-    restrictTo('user', 'teacher', 'mod', 'admin'),
-    getAllSubjects,
-  );
+  .post(restrictTo('mod', 'admin'), createSubject)
+  .get(restrictTo('user', 'teacher', 'mod', 'admin'), getAllSubjects);
 router
   .route('/:id')
-  .get(
-    protectedRoute,
-    restrictTo('user', 'teacher', 'mod', 'admin'),
-    getSubject,
-  )
-  .patch(protectedRoute, restrictTo('teacher', 'mod', 'admin'), updateSubject)
-  .delete(protectedRoute, restrictTo('teacher', 'mod', 'admin'), deleteSubject);
+  .get(restrictTo('user', 'teacher', 'mod', 'admin'), getSubject)
+  .patch(restrictTo('mod', 'admin'), updateSubject)
+  .delete(restrictTo('mod', 'admin'), deleteSubject);
 
 export default router;

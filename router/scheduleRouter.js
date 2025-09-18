@@ -14,23 +14,17 @@ const router = express.Router();
 
 router.use('/:scheduleId/entrie', entrieRouter);
 
+router.use(protectedRoute);
+
 router
   .route('/')
-  .get(
-    protectedRoute,
-    restrictTo('user', 'teacher', 'mod', 'admin'),
-    getAllSchedule,
-  )
-  .post(protectedRoute, restrictTo('teacher', 'mod', 'admin'), createSchedule);
+  .get(restrictTo('user', 'teacher', 'mod', 'admin'), getAllSchedule)
+  .post(restrictTo('mod', 'admin'), createSchedule);
 
 router
   .route('/:id')
-  .get(
-    protectedRoute,
-    restrictTo('user', 'teacher', 'mod', 'admin'),
-    getSchedule,
-  )
-  .delete(protectedRoute, restrictTo('teacher', 'mod', 'admin'), deleteSchedule)
-  .patch(protectedRoute, restrictTo('teacher', 'mod', 'admin'), updateSchedule);
+  .get(restrictTo('user', 'teacher', 'mod', 'admin'), getSchedule)
+  .delete(restrictTo('mod', 'admin'), deleteSchedule)
+  .patch(restrictTo('mod', 'admin'), updateSchedule);
 
 export default router;
