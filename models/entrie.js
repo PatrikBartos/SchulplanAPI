@@ -23,5 +23,8 @@ const entrieModel = new mongoose.Schema(
   },
 );
 
+entrieModel.index({ className: 1 });
+entrieModel.index({ entrie: 1 });
+
 const Entrie = mongoose.model('Entrie', entrieModel);
 export default Entrie;

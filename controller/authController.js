@@ -114,20 +114,7 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError('Falsche Email oder Password', 401));
   }
 
-  const payload = { id: user._id, email: user.email, role: user.role };
-
-  const token = jwt.sign(payload, privateKey, {
-    algorithm: 'RS256',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  });
-
-  user.password = undefined;
-
-  res.status(200).json({
-    status: 'success',
-    token,
-    data: { user },
-  });
+  sendCreateToken(user, 200, res);
 });
 
 export const protectedRoute = catchAsync(async (req, res, next) => {

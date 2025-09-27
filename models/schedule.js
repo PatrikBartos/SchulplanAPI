@@ -62,6 +62,8 @@ scheduleModel.virtual('entrie', {
   localField: '_id',
 });
 
+scheduleModel.index({ className: 1 });
+
 const Schedule = mongoose.model('Schedule', scheduleModel);
 
 export default Schedule;

@@ -22,6 +22,8 @@ const subjectModel = new mongoose.Schema(
   },
 );
 
-const Subject = mongoose.model('Subject', subjectModel);
+subjectModel.index({ className: 1 });
+subjectModel.index({ teacher: 1 });
 
+const Subject = mongoose.model('Subject', subjectModel);
 export default Subject;
